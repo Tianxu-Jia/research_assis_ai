@@ -1,0 +1,38 @@
+[
+    {
+        "Name": "adaptive_block_size",
+        "Title": "Adaptive Block Size: Dynamic Context Window Adjustment for Efficient Training",
+        "Experiment": "Modify the model to dynamically adjust its block size during training, starting with a smaller block size and gradually increasing it. This could potentially lead to faster initial training and better long-range dependency learning.",
+        "Interestingness": 6,
+        "Feasibility": 4,
+        "Novelty": 4,
+        "novel": true
+    },
+    {
+        "Name": "layerwise_learning_rates",
+        "Title": "Layer-wise Learning Rate Adaptation: Optimizing Training Dynamics in Transformer Models",
+        "Experiment": "Implement layer-wise learning rates, where each transformer layer has its own learning rate. Modify the configure_optimizers function to assign different learning rates to different layers, with deeper layers having lower learning rates. Compare the training dynamics, convergence speed, and final performance with the baseline model.",
+        "Interestingness": 4,
+        "Feasibility": 6,
+        "Novelty": 2,
+        "novel": true
+    },
+    {
+        "Name": "_adaptive_context_window",
+        "Title": "Adaptive Context Window: Dynamic Adjustment with Algorithmic Control and Metric-Driven Adaptation",
+        "Experiment": "Implement a context window adjustment algorithm using established metrics (e.g., perplexity, loss, accuracy). Ensure scalability and efficiency for large datasets and models. Evaluate fairness, interpretability, and performance on various tasks.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 5,
+        "novel": false
+    },
+    {
+        "Name": "_complexity_interpretability_trade-offs",
+        "Title": "Exploring Complexity-Interpretability Trade-offs in Transformer Models via Regularization: A Study on Image Classification and Sentiment Analysis with Practical Implications",
+        "Experiment": "Investigate how different types of regularization (L1, L2, dropout) affect model performance and interpretability in image classification or text sentiment analysis tasks, and explore the practical implications of these findings on real-world applications.",
+        "Interestingness": 8,
+        "Feasibility": 9,
+        "Novelty": 5,
+        "novel": true
+    }
+]

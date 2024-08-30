@@ -1,0 +1,38 @@
+[
+    {
+        "Name": "adaptive_block_size",
+        "Title": "Adaptive Block Size: Dynamic Context Window Adjustment for Efficient Training",
+        "Experiment": "Modify the model to dynamically adjust its block size during training, starting with a smaller block size and gradually increasing it. This could potentially lead to faster initial training and better long-range dependency learning.",
+        "Interestingness": 6,
+        "Feasibility": 4,
+        "Novelty": 4,
+        "novel": true
+    },
+    {
+        "Name": "layerwise_learning_rates",
+        "Title": "Layer-wise Learning Rate Adaptation: Optimizing Training Dynamics in Transformer Models",
+        "Experiment": "Implement layer-wise learning rates, where each transformer layer has its own learning rate. Modify the configure_optimizers function to assign different learning rates to different layers, with deeper layers having lower learning rates. Compare the training dynamics, convergence speed, and final performance with the baseline model.",
+        "Interestingness": 4,
+        "Feasibility": 6,
+        "Novelty": 2,
+        "novel": false
+    },
+    {
+        "Name": "char_level_augmentation",
+        "Title": "Character-Level Data Augmentation: Enhancing Robustness and Generalization in Language Models",
+        "Experiment": "Implement character-level data augmentation techniques such as random character deletion, insertion, swapping, and substitution. Implement these within the get_batch function. Compare the training dynamics, convergence speed, and final performance with the baseline model without augmentation. Evaluation metrics will include training and validation loss, and generalization performance measured by sampling and evaluating generated text.",
+        "Interestingness": 7,
+        "Feasibility": 8,
+        "Novelty": 6,
+        "novel": true
+    },
+    {
+        "Name": "lora_finetuning",
+        "Title": "Parameter-Efficient Fine-Tuning with Low-Rank Adaptation for Character-Level Language Models",
+        "Experiment": "Implement Low-Rank Adaptation (LoRA) in the Linear layers of the model by decomposing the weight matrices into lower-rank matrices. Modify the 'forward' method in the Linear layers to support this change. Update the training loop to account for parameter updates specific to LoRA. Evaluate the training dynamics, convergence speed, memory usage, and final performance compared to the baseline model.",
+        "Interestingness": 8,
+        "Feasibility": 7,
+        "Novelty": 8,
+        "novel": true
+    }
+]

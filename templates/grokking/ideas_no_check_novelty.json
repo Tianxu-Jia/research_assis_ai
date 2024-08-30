@@ -1,0 +1,95 @@
+[
+    {
+        "Name": "batch_size_grokking",
+        "Title": "Batch Size Grokking: Assessing the impact of the training batchsize on the grokking phenomenon",
+        "Experiment": "Modify the experiments to dynamically adjust the batch size during training, starting with a small batch size and gradually increasing it. This could potentially lead to faster generalization on the validation set.",
+        "Interestingness": 6,
+        "Feasibility": 4,
+        "Novelty": 4
+    },
+    {
+        "Name": "layer_lr_grokking",
+        "Title": "Layer and Learning Rate Grokking: Optimizing Neural Network Training for Generalization",
+        "Experiment": "Modify the existing code to train multiple Transformer models with varying numbers of layers and learning rates on the same dataset. Experiment with a range of layer configurations (e.g., 1 to 4 layers) and learning rates (e.g., 1e-3 to 1e-1). Record the training and validation performance to identify the optimal layer depth and learning rate for achieving grokking. Analyze the results to understand how these parameters influence the grokking phenomenon.",
+        "Interestingness": 8,
+        "Feasibility": 8,
+        "Novelty": 7
+    },
+    {
+        "Name": "output_diversity_grokking",
+        "Title": "Output Diversity Grokking: Investigating Generalization in Diverse Datasets",
+        "Experiment": "Modify the existing code to create a series of datasets with varying levels of output diversity. Define output diversity as the number of unique outputs and the distribution of these outputs. Train Transformer models on these datasets and analyze how the grokking phenomenon correlates with output diversity. Experiment with different architectures and hyperparameters to determine the optimal configurations for handling diverse datasets. Compare the performance on validation sets to understand the impact of output diversity on generalization.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 9
+    },
+    {
+        "Name": "nlp_grokking_holistic",
+        "Title": "Holistic Investigation of the Grokking Phenomenon in Natural Language Processing",
+        "Experiment": {
+            "Objective": "Explore the grokking phenomenon across various Transformer architectures and learning rate schedules in the context of NLP tasks to understand its underlying mechanisms and implications for generalization.",
+            "Design": {
+                "Tasks": "Focus on NLP tasks such as text classification, sentiment analysis, and machine translation.",
+                "Model Architectures": "Experiment with various Transformer architectures, including different numbers of layers, hidden dimensions, and attention mechanisms.",
+                "Learning Rate Schedules": "Evaluate the impact of different learning rate schedules, such as constant learning rate, exponential decay, and cyclical learning rate, on the grokking phenomenon.",
+                "Training Process": "Train models on small datasets and gradually increase the dataset size to observe the transition from memorization to generalization.",
+                "Performance Metrics": "Measure generalization performance using validation sets and compare it with the performance on the training sets."
+            },
+            "Implementation": {
+                "Modify existing code": "Adapt the provided code to handle different Transformer architectures and learning rate schedules.",
+                "Data Collection": "Collect and preprocess NLP datasets from standard repositories such as GLUE or WIKITEXT.",
+                "Model Training": "Train models on the NLP datasets using the specified architectures and learning rate schedules.",
+                "Analysis": "Analyze the results to identify patterns and correlations in the grokking phenomenon."
+            },
+            "Interestingness": 9,
+            "Feasibility": 8,
+            "Novelty": 8
+        }
+    },
+    {
+        "Name": "rl_grokking_simple",
+        "Title": "Simple Reinforcement Learning Grokking: Investigating Generalization in Controlled Environments",
+        "Experiment": {
+            "Objective": "Explore the grokking phenomenon in reinforcement learning by training a Transformer-based model on simple tasks in OpenAI Gym.",
+            "Design": {
+                "Tasks": [
+                    "CartPole",
+                    "MountainCar"
+                ],
+                "Reward Functions": "Define reward functions that encourage efficient learning of the tasks.",
+                "Model Architectures": "Use a smaller Transformer-based model with 1 to 2 layers and a hidden dimension of 64.",
+                "Hyperparameters": "Experiment with a range of learning rates (e.g., 1e-4 to 1e-2) and batch sizes (e.g., 32 to 128)."
+            },
+            "Implementation": {
+                "Environment Setup": "Set up the RL environments using OpenAI Gym and stable-baselines3.",
+                "Model Training": "Train the Transformer-based model on the selected tasks, monitoring the learning process to identify grokking behavior.",
+                "Analysis": "Analyze the results to identify patterns in the grokking phenomenon across the tasks."
+            },
+            "Interestingness": 8,
+            "Feasibility": 9,
+            "Novelty": 7
+        }
+    },
+    {
+        "Name": "nlp_grokking",
+        "Title": "NLP Grokking: Investigating Neural Network Generalization in Natural Language Processing",
+        "Experiment": {
+            "Objective": "Explore the grokking phenomenon in NLP tasks to understand its implications for neural network generalization.",
+            "Design": {
+                "Tasks": "Focus on NLP tasks such as text classification and sentiment analysis.",
+                "Model Architectures": "Experiment with a range of Transformer architectures, including 1 to 3 layers and hidden dimensions of 64 to 256.",
+                "Learning Rate Schedules": "Evaluate the impact of constant learning rate, exponential decay, and cyclical learning rate schedules.",
+                "Training Process": "Train models on small datasets and gradually increase the dataset size to observe the transition from memorization to generalization.",
+                "Performance Metrics": "Measure generalization performance using validation sets and compare it with the performance on the training sets."
+            },
+            "Implementation": {
+                "Data Collection": "Collect and preprocess datasets from standard repositories such as GLUE or WIKITEXT.",
+                "Model Training": "Train models on the NLP datasets using the specified architectures and learning rate schedules.",
+                "Analysis": "Analyze the results to identify patterns and correlations in the grokking phenomenon across the tasks."
+            },
+            "Interestingness": 9,
+            "Feasibility": 8,
+            "Novelty": 9
+        }
+    }
+]

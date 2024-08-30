@@ -1,0 +1,56 @@
+[
+    {
+        "Name": "batch_size_grokking",
+        "Title": "Batch Size Grokking: Assessing the impact of the training batchsize on the grokking phenomenon",
+        "Experiment": "Modify the experiments to dynamically adjust the batch size during training, starting with a small batch size and gradually increasing it. This could potentially lead to faster generalization on the validation set.",
+        "Interestingness": 6,
+        "Feasibility": 4,
+        "Novelty": 4,
+        "novel": true
+    },
+    {
+        "Name": "optimizer_stability_nosiy_data",
+        "Title": "Early-Stage Stability Analysis: How Different Optimizers Handle Noisy Data",
+        "Experiment": "Compare the impact of various optimizers (Adam, SGD with momentum, RMSprop) on model stability when training neural networks with noisy or limited data.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 7,
+        "novel": true
+    },
+    {
+        "Name": "meta_adaptive_regularizer",
+        "Title": "Exploring Adaptive Regularization Strategies via Meta-Learning and Bayesian Neural Networks",
+        "Experiment": "Modify an existing architecture to incorporate a learnable regularization scheme that can be adapted using meta-learning or Bayesian neural networks. Analyze the effects of this adaptive regularizer on model performance and generalizability.",
+        "Interestingness": 8,
+        "Feasibility": 9,
+        "Novelty": 7,
+        "novel": true
+    },
+    {
+        "Name": "multi_metric_hyper_tuning",
+        "Title": "Hyperparameter Tuning Strategies for Fair, Robust, and Accurate Machine Learning Models",
+        "Experiment": "Modify the existing code to incorporate a suite of model evaluation metrics (fairness, robustness, accuracy, precision, recall, F1-score) alongside hyperparameter tuning methods, evaluating their effects on model performance across different models and datasets.",
+        "Interestingness": 9,
+        "Feasibility": 9,
+        "Novelty": 7,
+        "novel": false
+    },
+    {
+        "Name": "SHAPplorer",
+        "Title": "An Interactive Visualization Tool for Model Interpretability",
+        "Experiment": "Develop an interactive graph-based visualization tool combining SHAP values and saliency maps. Allow users to dynamically adjust parameters for a more intuitive exploration of complex models.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 8,
+        "novel": true
+    },
+    {
+        "Name": "interpretability_grokking",
+        "Title": "Model Interpretability and Grokking Phenomenon: A Comprehensive Experimental Study",
+        "Experiment": "Design a 2x2 or 3x3 experimental study to investigate the effect of model interpretability on generalization performance across multiple datasets with varying levels of complexity.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 8,
+        "novel": true
+    }
+]
