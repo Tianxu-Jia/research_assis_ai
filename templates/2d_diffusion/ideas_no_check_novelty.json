@@ -5,46 +5,52 @@
         "Experiment": "In this experiment, we compare the performance of different learning rate schedules on diffusion model performance. We use the final estimated KL as the evaluation metric.",
         "Interestingness": 4,
         "Feasibility": 10,
-        "Novelty": 3
+        "Novelty": 3,
+        "novel": false
     },
     {
-        "Name": "mode_conditional_diffusion",
-        "Title": "Mode-Conditional Diffusion Models for Controlled Generation in Low-Dimensional Spaces",
-        "Experiment": "1. Identify distinct modes in each dataset. 2. Modify MLPDenoiser to accept a one-hot encoded mode condition. 3. Update the training process to include this mode condition. 4. Implement a method to generate samples conditioned on specific modes. 5. Evaluate control effectiveness by measuring the percentage of generated samples that fall within the target mode. 6. Compare unconditional and conditional generation results across different datasets, focusing on multi-modal datasets like 'moons' and 'dino'.",
+        "Name": "mode_targeted_diffusion",
+        "Title": "Mode-Targeted Generation in Low-Dimensional Diffusion Models",
+        "Experiment": "Modify MLPDenoiser to accept a one-hot encoded target mode. Add a mode embedding layer and concatenate its output with existing embeddings. Implement mode definition based on dataset characteristics (e.g., quadrants for 'moons'). Compare unconditional and mode-targeted samples using KL divergence and introduce a mode accuracy metric. Evaluate performance across all provided 2D datasets.",
         "Interestingness": 8,
         "Feasibility": 8,
-        "Novelty": 7
+        "Novelty": 7,
+        "novel": true
     },
     {
-        "Name": "advanced_noise_schedules",
-        "Title": "Comparative Analysis of Noise Schedules in Low-Dimensional Diffusion Models: Impact on Sample Quality and Generation Process",
-        "Experiment": "1. Modify NoiseScheduler to include cosine and sigmoid schedules alongside existing linear and quadratic. 2. Run experiments with all schedules on all datasets. 3. Compare final KL divergence, training time, and loss curves. 4. Analyze and visualize intermediate generation steps (e.g., every 10th step) to understand how different schedules affect the diffusion process. 5. Investigate if optimal schedules vary across different low-dimensional datasets and their characteristics (e.g., multi-modal vs. unimodal).",
+        "Name": "noise_schedule_comparison",
+        "Title": "Comparative Analysis of Noise Schedules in Low-Dimensional Diffusion Models",
+        "Experiment": "1. Modify NoiseScheduler to include cosine and step schedules. 2. Train models with all schedule types (linear, quadratic, cosine, step) on each dataset. 3. Compare performance using final KL divergence, training time, and sample quality. 4. Analyze how different schedules interact with various low-dimensional data distributions.",
         "Interestingness": 8,
+        "Feasibility": 8,
+        "Novelty": 7,
+        "novel": true
+    },
+    {
+        "Name": "embedding_dimension_analysis",
+        "Title": "Optimizing Embedding Dimensions in Low-Dimensional Diffusion Models",
+        "Experiment": "1. Modify MLPDenoiser to accept embedding_dim as a parameter for both time and input embeddings. 2. Categorize datasets by complexity (e.g., number of modes: circle=1, line=1, moons=2, dino=multiple). 3. Train models with various embedding dimensions (32, 64, 128, 256, 512) on each dataset. 4. Compare performance using final KL divergence, steps to reach KL threshold, visual sample quality, and training time. 5. Analyze the relationship between dataset complexity and optimal embedding dimension. 6. Investigate potential overfitting and diminishing returns with very high embedding dimensions.",
+        "Interestingness": 9,
         "Feasibility": 9,
-        "Novelty": 7
+        "Novelty": 7,
+        "novel": true
     },
     {
-        "Name": "learnable_2d_embeddings",
-        "Title": "Learnable Embeddings for Enhanced Representation of Low-Dimensional Data in Diffusion Models",
-        "Experiment": "1. Implement a learnable embedding layer as an alternative to SinusoidalEmbedding in MLPDenoiser. 2. Train models with learnable embeddings, sinusoidal embeddings, and raw coordinate inputs on all datasets. 3. Compare performance metrics (KL divergence, training time, loss curves) among the three input representations. 4. Analyze learned embeddings: visualize the embedding space, investigate optimal dimensionality, and examine how they capture dataset characteristics. 5. Test generalization by training on one dataset and evaluating on others. 6. Visualize generated samples and intermediate steps to understand how different embeddings affect the diffusion process.",
+        "Name": "cross_dataset_generalization",
+        "Title": "One-to-Many Transfer Learning in Low-Dimensional Diffusion Models",
+        "Experiment": "1. Modify the training loop to save the model trained on the 'circle' dataset. 2. Implement a function to evaluate this trained model on all datasets using both KL divergence and evaluation loss. 3. Generate and visually compare samples from the transfer scenarios. 4. Repeat the experiment with different embedding dimensions (64, 128, 256) to analyze its impact on transfer performance. 5. Discuss implications for designing robust low-dimensional diffusion models.",
         "Interestingness": 9,
-        "Feasibility": 8,
-        "Novelty": 8
+        "Feasibility": 9,
+        "Novelty": 8,
+        "novel": true
     },
     {
-        "Name": "kde_regularization",
-        "Title": "Improving Sample Diversity in Low-Dimensional Diffusion Models using KDE-based Regularization",
-        "Experiment": "1. Implement a KDE-based regularization term using sklearn's KernelDensity. 2. Modify the training loss in experiment.py: L = L_diffusion - \u03bb * log(KDE(x_generated)). 3. Add a hyperparameter \u03bb to control regularization strength. 4. Train models with and without regularization on all datasets (circle, dino, line, moons). 5. Evaluate sample diversity using average nearest neighbor distance and coverage metrics. 6. Compare training curves, final KL divergence, and inference time between regularized and non-regularized models across all datasets. 7. Visualize generated samples and KDE plots to illustrate the impact of regularization on different data distributions.",
+        "Name": "temperature_controlled_sampling",
+        "Title": "Temperature-Controlled Sampling in Low-Dimensional Diffusion Models: Balancing Quality and Diversity",
+        "Experiment": "1. Modify NoiseScheduler's step function to include a temperature parameter that scales the noise added during sampling. 2. Implement a temperature-controlled sampling function. 3. Train models on each dataset using the original settings. 4. Generate samples at various temperatures (0.5, 0.8, 1.0, 1.2, 1.5) for each trained model. 5. Evaluate samples using KL divergence, visual inspection, average pairwise distance (diversity metric), and a new mode coverage metric (e.g., k-means clustering). 6. Compare results at different temperatures with the baseline (temp=1.0). 7. Analyze the quality-diversity trade-off and mode coverage across different datasets and temperatures.",
         "Interestingness": 9,
         "Feasibility": 8,
-        "Novelty": 8
-    },
-    {
-        "Name": "mc_dropout_uncertainty",
-        "Title": "Analyzing Model Uncertainty in Low-Dimensional Diffusion Models using Monte Carlo Dropout",
-        "Experiment": "1. Modify MLPDenoiser to include a single dropout layer before the final linear layer. 2. Implement MC Dropout inference for three key timesteps: early (t=10), middle (t=50), and late (t=90). 3. For each dataset and timestep, generate 100 samples with 50 MC Dropout forward passes each. 4. Calculate mean and variance of predictions for each sample. 5. Visualize uncertainty distributions for each dataset and timestep. 6. Compute correlation between uncertainty and sample quality (measured by distance to nearest training point). 7. Compare uncertainty patterns across datasets and relate to dataset characteristics.",
-        "Interestingness": 9,
-        "Feasibility": 8,
-        "Novelty": 8
+        "Novelty": 8,
+        "novel": true
     }
 ]

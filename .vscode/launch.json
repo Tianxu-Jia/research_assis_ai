@@ -42,7 +42,9 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--model", "anthropic/claude-3-5-sonnet-20240620", 
+            "args": ["--skip-idea-generation",
+                     "--skip-novelty-check",
+                     "--model", "anthropic/claude-3-5-sonnet-20240620", 
                      "--experiment", "2d_diffusion", 
                      "--num-ideas", "5"]
         }
