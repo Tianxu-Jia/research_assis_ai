@@ -184,46 +184,19 @@ def get_response_from_llm(msg, client, model, system_message, print_debug=True, 
     if msg_history is None:
         msg_history = []
     
-    if model[0].split('/')[0] == "huggingface":
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+    
+    #if model.split('/')[0] == "huggingface":
+    #    new_msg_history = msg_history + [{"role": "user", "content": msg}]
 
-        hf_model = "/".join(model[0].split('/')[1:])
-        response = huggingface_client.chat.completions.create(
-            model=hf_model,
-            messages=[
-                {"role": "system", "content": system_message},                
-                #{"role": "user", "content": "Count to 10"},
-                *new_msg_history,
-            ],
-            temperature=0.75,    
-            n=1,
-            stop=None,
-            seed=0,
-            stream=False,
-            max_tokens=1024,
-        )
-
-        content = response.choices[0].message.content       
+    #    tokenizer = AutoTokenizer.from_pretrained("/".join(model.split('/')[1:]), trust_remote_code=True)
+    #    hf_model = AutoModelForCausalLM.from_pretrained("/".join(model.split('/')[1:]), torch_dtype=torch.bfloat16, trust_remote_code=True, device_map="auto")
+    #    hf_model = hf_model.eval()
         
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-
-    elif model.split('/')[0]== "ollama":
-        response = client.chat.completions.create(
-            model=model.split('/')[1],
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
-        )
-        
-        content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]      
-        
-        content = response['message']['content']
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-
-
-    elif "claude" in model:
+    #    content, history = hf_model.chat(tokenizer, query=system_message, history=new_msg_history, max_new_tokens=32768, temperature=0.5, top_p=0.7)
+    #    new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+    #    debug = 1
+    '''
+    if "claude" in model:
         new_msg_history = msg_history + [
             {
                 "role": "user",
@@ -254,10 +227,51 @@ def get_response_from_llm(msg, client, model, system_message, print_debug=True, 
                 ],
             }
         ]
+     '''   
+    if model.split("/")[0] == "anthropic":
+        
+        new_msg_history = msg_history + [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": msg,
+                    }
+                ],
+            }
+        ]
+
+        client_model = model.split("/")[1]
+
+        response = client.messages.create(
+            model=client_model,
+            max_tokens=3000,
+            temperature=temperature,
+            system=system_message,
+            messages=new_msg_history,
+        )
+
+        content = response.content[0].text
+        new_msg_history = new_msg_history + [
+            {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": content,
+                    }
+                ],
+            }
+        ]
+        debou = 1
+
     elif model in [
         "gpt-4o-2024-05-13",
         "gpt-4o-mini-2024-07-18",
         "gpt-4o-2024-08-06",
+        "llama3.1", "deepseek-coder-v2", "phi3.5",   ## ollama
+        "THUDM/LongWriter-glm4-9b",   #HuggingFace
     ]:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(

@@ -1,0 +1,51 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ollama_nanoGPT_lite",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--model", "ollama/phi3.5", 
+                     "--experiment", "nanoGPT_lite", 
+                     "--num-ideas", "2"]
+        },
+        {
+            "name": "grokking",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--skip-idea-generation",
+                     "--skip-novelty-check",
+                     "--model", "ollama/llama3.1", 
+                     "--experiment", "grokking", 
+                     "--num-ideas", "5"]
+        },
+        {
+            "name": "huggingface",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--model", "huggingface/THUDM/LongWriter-glm4-9b", 
+                     "--experiment", "grokking", 
+                     "--num-ideas", "5"]
+        },
+        {
+            "name": "claude-2d-diffusion",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--model", "anthropic/claude-3-5-sonnet-20240620", 
+                     "--experiment", "2d_diffusion", 
+                     "--num-ideas", "5"]
+        }
+
+    ]    
+}

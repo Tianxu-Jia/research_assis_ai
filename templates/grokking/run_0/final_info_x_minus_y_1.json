@@ -1,1 +1,1 @@
-{"final_train_loss": 0.005171285010874271, "final_val_loss": 0.005656439810991287, "final_train_acc": 1.0, "final_val_acc": 1.0, "step_val_acc_99": 3660}
+{"final_train_loss": 0.28089869022369385, "final_val_loss": 0.13775652647018433, "final_train_acc": 0.970898449420929, "final_val_acc": 0.990478515625, "step_val_acc_99": 3360}

@@ -2,6 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+**/results/
+results/
+results/*
+**/data/
+data/
+data/*
 
 # C extensions
 *.so

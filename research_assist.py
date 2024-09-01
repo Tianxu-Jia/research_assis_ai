@@ -66,7 +66,10 @@ def parse_arguments():
             "ollama/deepseek-coder-v2:16b",
             "ollama/phi3.5",
             # huggingface models
-            "huggingface/THUDM/LongWriter-glm4-9b",
+            #"huggingface/THUDM/LongWriter-glm4-9b",
+            # anthropic claude
+            "anthropic/claude-3-5-sonnet-20240620"
+
         ],
         help="Model to use for AI Scientist.",
     )
@@ -191,6 +194,8 @@ def do_idea(base_dir, results_dir, idea, model, client, client_model, writeup, i
             main_model = Model("deepseek/deepseek-coder")
         elif model == "llama3.1-405b":
             main_model = Model("openrouter/meta-llama/llama-3.1-405b-instruct")
+        elif model.split("/")[0] == "anthropic":
+            main_model = Model(model.split("/")[1])
         else:
             main_model = Model(model)
         coder = Coder.create(
@@ -337,30 +342,39 @@ if __name__ == "__main__":
     If the specified model is not supported, the function raises a `ValueError`.
     """
     # Create client
-    if args.model.split('/')[0]== "huggingface":
-        from transformers import AutoTokenizer, AutoModelForCausalLM
-        import torch
+    #if args.model.split('/')[0]== "huggingface":
+    #    from huggingface_hub import InferenceClient#
 
-        print(f"Using HuggingFace python API with model {args.model}.")
+    #    print(f"Using HuggingFace python API with model {args.model}.")
 
-        client_model = args.model, #"/".join(args.model.split('/')[1:])
-        client = AutoModelForCausalLM.from_pretrained("/".join(args.model.split('/')[1:]), torch_dtype=torch.bfloat16, trust_remote_code=True, device_map="auto")
-        client = client.eval()
+    #    client_model = args.model
+    #    client = InferenceClient(    
+    #        api_key="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",
+    #        )
 
-    elif args.model.split('/')[0]== "ollama":
-        import ollama
-        from ollama import Client
+    if args.model.split('/')[0]== "ollama":
+        from openai import OpenAI
 
         print(f"Using Ollama python API with model {args.model}.")
-        client_model = args.model
-        client = Client(host='http://localhost:11434')
+        client_model = args.model.split('/')[1]
+        client = OpenAI(
+            base_url = 'http://localhost:11434/v1',
+            api_key='ollama', # required, but unused
+        )
 
-    elif args.model == "claude-3-5-sonnet-20240620":
-        import anthropic
-
+    elif args.model.split('/')[0]== "anthropic":
         print(f"Using Anthropic API with model {args.model}.")
-        client_model = "claude-3-5-sonnet-20240620"
+        import anthropic
+        
+        client_model = args.model
         client = anthropic.Anthropic()
+
+    #elif args.model == "claude-3-5-sonnet-20240620":
+    #    import anthropic
+
+    #    print(f"Using Anthropic API with model {args.model}.")
+    #    client_model = "claude-3-5-sonnet-20240620"
+    #    client = anthropic.Anthropic()
     elif args.model.startswith("bedrock") and "claude" in args.model:
         import anthropic
 

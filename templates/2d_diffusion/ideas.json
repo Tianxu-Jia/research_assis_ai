@@ -1,0 +1,50 @@
+[
+    {
+        "Name": "learning_rate_schedule",
+        "Title": "Adaptive Learning Rate Schedules: Comparing different learning rate schedules for diffusion models.",
+        "Experiment": "In this experiment, we compare the performance of different learning rate schedules on diffusion model performance. We use the final estimated KL as the evaluation metric.",
+        "Interestingness": 4,
+        "Feasibility": 10,
+        "Novelty": 3
+    },
+    {
+        "Name": "mode_conditional_diffusion",
+        "Title": "Mode-Conditional Diffusion Models for Controlled Generation in Low-Dimensional Spaces",
+        "Experiment": "1. Identify distinct modes in each dataset. 2. Modify MLPDenoiser to accept a one-hot encoded mode condition. 3. Update the training process to include this mode condition. 4. Implement a method to generate samples conditioned on specific modes. 5. Evaluate control effectiveness by measuring the percentage of generated samples that fall within the target mode. 6. Compare unconditional and conditional generation results across different datasets, focusing on multi-modal datasets like 'moons' and 'dino'.",
+        "Interestingness": 8,
+        "Feasibility": 8,
+        "Novelty": 7
+    },
+    {
+        "Name": "advanced_noise_schedules",
+        "Title": "Comparative Analysis of Noise Schedules in Low-Dimensional Diffusion Models: Impact on Sample Quality and Generation Process",
+        "Experiment": "1. Modify NoiseScheduler to include cosine and sigmoid schedules alongside existing linear and quadratic. 2. Run experiments with all schedules on all datasets. 3. Compare final KL divergence, training time, and loss curves. 4. Analyze and visualize intermediate generation steps (e.g., every 10th step) to understand how different schedules affect the diffusion process. 5. Investigate if optimal schedules vary across different low-dimensional datasets and their characteristics (e.g., multi-modal vs. unimodal).",
+        "Interestingness": 8,
+        "Feasibility": 9,
+        "Novelty": 7
+    },
+    {
+        "Name": "learnable_2d_embeddings",
+        "Title": "Learnable Embeddings for Enhanced Representation of Low-Dimensional Data in Diffusion Models",
+        "Experiment": "1. Implement a learnable embedding layer as an alternative to SinusoidalEmbedding in MLPDenoiser. 2. Train models with learnable embeddings, sinusoidal embeddings, and raw coordinate inputs on all datasets. 3. Compare performance metrics (KL divergence, training time, loss curves) among the three input representations. 4. Analyze learned embeddings: visualize the embedding space, investigate optimal dimensionality, and examine how they capture dataset characteristics. 5. Test generalization by training on one dataset and evaluating on others. 6. Visualize generated samples and intermediate steps to understand how different embeddings affect the diffusion process.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 8
+    },
+    {
+        "Name": "kde_regularization",
+        "Title": "Improving Sample Diversity in Low-Dimensional Diffusion Models using KDE-based Regularization",
+        "Experiment": "1. Implement a KDE-based regularization term using sklearn's KernelDensity. 2. Modify the training loss in experiment.py: L = L_diffusion - \u03bb * log(KDE(x_generated)). 3. Add a hyperparameter \u03bb to control regularization strength. 4. Train models with and without regularization on all datasets (circle, dino, line, moons). 5. Evaluate sample diversity using average nearest neighbor distance and coverage metrics. 6. Compare training curves, final KL divergence, and inference time between regularized and non-regularized models across all datasets. 7. Visualize generated samples and KDE plots to illustrate the impact of regularization on different data distributions.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 8
+    },
+    {
+        "Name": "mc_dropout_uncertainty",
+        "Title": "Analyzing Model Uncertainty in Low-Dimensional Diffusion Models using Monte Carlo Dropout",
+        "Experiment": "1. Modify MLPDenoiser to include a single dropout layer before the final linear layer. 2. Implement MC Dropout inference for three key timesteps: early (t=10), middle (t=50), and late (t=90). 3. For each dataset and timestep, generate 100 samples with 50 MC Dropout forward passes each. 4. Calculate mean and variance of predictions for each sample. 5. Visualize uncertainty distributions for each dataset and timestep. 6. Compute correlation between uncertainty and sample quality (measured by distance to nearest training point). 7. Compare uncertainty patterns across datasets and relate to dataset characteristics.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 8
+    }
+]

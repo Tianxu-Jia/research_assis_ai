@@ -398,10 +398,27 @@ if __name__ == "__main__":
         final_info_dict = {
             k: [d[k] for d in final_info_list] for k in final_info_list[0].keys()
         }
-        means = {f"{k}_mean": np.mean(v) for k, v in final_info_dict.items()}
-        stderrs = {
-            f"{k}_stderr": np.std(v) / len(v) for k, v in final_info_dict.items()
-        }
+        #means = {f"{k}_mean": np.mean(v) for k, v in final_info_dict.items()} TJ
+        
+        means = {}
+        stderrs = {}
+        for k, v in final_info_dict.items():
+            try:
+                # Convert v to a NumPy array and calculate the mean if possible
+                v_array = np.array(v, dtype=float)  # Ensure the data is numeric
+                mean_value = np.mean(v_array) if not np.isnan(v_array).any() else np.nan
+                std_value = np.std(v) / len(v)
+            except (ValueError, TypeError):
+                # If conversion fails, set the mean as NaN
+                mean_value = 0 #np.nan
+                std_value = 0
+
+            means[f"{k}_mean"] = mean_value
+            stderrs[f"{k}_stderr"] = std_value
+        
+        #stderrs = {
+        #    f"{k}_stderr": np.std(v) / len(v) for k, v in final_info_dict.items()
+        #}
         final_infos[dataset] = {
             "means": means,
             "stderrs": stderrs,
