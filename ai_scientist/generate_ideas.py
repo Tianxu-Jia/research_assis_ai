@@ -3,11 +3,14 @@ import os
 import os.path as osp
 import time
 from typing import List, Dict, Union
-from ai_scientist.llm import get_response_from_llm, extract_json_between_markers
+# TJ from ai_scientist.llm import get_response_from_llm, extract_json_between_markers
+from llm import get_response_from_llm, extract_json_between_markers
+import arxiv
 
 import requests
 import backoff
-from ai_scientist.prompts import idea_first_prompt, idea_reflection_prompt
+# TJ from ai_scientist.prompts import idea_first_prompt, idea_reflection_prompt
+from prompts import idea_first_prompt, idea_reflection_prompt
 
 S2_API_KEY = os.getenv("S2_API_KEY")
 
@@ -138,6 +141,58 @@ def on_backoff(details):
         f"calling function {details['target'].__name__} at {time.strftime('%X')}"
     )
 
+import subprocess
+@backoff.on_exception(backoff.expo, subprocess.CalledProcessError, max_tries=10)
+def get_bibtex_from_arXiv(arxiv_id):
+    result = subprocess.run(['arxiv2bib', arxiv_id],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            timeout=10,)    
+    if result.returncode == 0:
+        bibtex_entry = result.stdout
+    else:
+        print(f"error in get bibtex from arXiv")
+        raise
+    
+    return bibtex_entry
+
+def search_for_papers_from_arXive(query, result_limit=2) -> Union[None, List[Dict]]:
+    if not query:
+        return None
+    
+    client = arxiv.Client(        
+        delay_seconds=3,
+        num_retries=3,        
+    )
+    
+    search = arxiv.Search(
+        query=query,
+        max_results=result_limit,
+        sort_by=arxiv.SortCriterion.SubmittedDate
+    )
+   
+    papers = []
+    for result in client.results(search):
+        paper = {}
+        paper["authors"] = ' and '.join([author.name for author in result.authors])
+        paper["title"] = result.title
+        paper["year"] = result.published.year
+        paper['arxiv_id'] = result.entry_id.split('/')[-1]  # Extract arXiv ID from the entry URL
+        url = result.entry_id
+        paper["abstract"] = result.summary
+
+        # Create BibTeX entry
+        bibtex_entry = get_bibtex_from_arXiv(paper['arxiv_id'])               
+
+        paper['citationStyles'] = {"bibtex": bibtex_entry}
+        paper["venue"] = "arXiv"
+        
+        papers.append(paper)
+    
+    return papers
+
+##################################################################
 
 @backoff.on_exception(
     backoff.expo, requests.exceptions.HTTPError, on_backoff=on_backoff
@@ -155,17 +210,20 @@ def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
         },
     )
     print(f"Response Status Code: {rsp.status_code}")
-    print(
-        f"Response Content: {rsp.text[:500]}"
-    )  # Print the first 500 characters of the response content
-    rsp.raise_for_status()
-    results = rsp.json()
-    total = results["total"]
-    time.sleep(1.0)
-    if not total:
-        return None
+    if rsp.status_code == 429:
+        papers = search_for_papers_from_arXive(query, result_limit=1)
+    else:
+        pass
+        print(f"Response Content: {rsp.text[:500]}" )  # Print the first 500 characters of the response content
+        rsp.raise_for_status()
+        results = rsp.json()
+        total = results["total"]
+        time.sleep(1.0)
+        if not total:
+            return None
 
-    papers = results["data"]
+        papers = results["data"]
+    
     return papers
 
 

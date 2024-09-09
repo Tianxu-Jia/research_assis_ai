@@ -1,0 +1,56 @@
+[
+    {
+        "Name": "learning_rate_schedule",
+        "Title": "Adaptive Learning Rate Schedules: Comparing different learning rate schedules for diffusion models.",
+        "Experiment": "In this experiment, we compare the performance of different learning rate schedules on diffusion model performance. We use the final estimated KL as the evaluation metric.",
+        "Interestingness": 4,
+        "Feasibility": 10,
+        "Novelty": 3,
+        "novel": false
+    },
+    {
+        "Name": "mode_targeted_diffusion",
+        "Title": "Mode-Targeted Generation in Low-Dimensional Diffusion Models",
+        "Experiment": "Modify MLPDenoiser to accept a one-hot encoded target mode. Add a mode embedding layer and concatenate its output with existing embeddings. Implement mode definition based on dataset characteristics (e.g., quadrants for 'moons'). Compare unconditional and mode-targeted samples using KL divergence and introduce a mode accuracy metric. Evaluate performance across all provided 2D datasets.",
+        "Interestingness": 8,
+        "Feasibility": 8,
+        "Novelty": 7,
+        "novel": true
+    },
+    {
+        "Name": "noise_schedule_comparison",
+        "Title": "Comparative Analysis of Noise Schedules in Low-Dimensional Diffusion Models",
+        "Experiment": "1. Modify NoiseScheduler to include cosine and step schedules. 2. Train models with all schedule types (linear, quadratic, cosine, step) on each dataset. 3. Compare performance using final KL divergence, training time, and sample quality. 4. Analyze how different schedules interact with various low-dimensional data distributions.",
+        "Interestingness": 8,
+        "Feasibility": 8,
+        "Novelty": 7,
+        "novel": true
+    },
+    {
+        "Name": "embedding_dimension_analysis",
+        "Title": "Optimizing Embedding Dimensions in Low-Dimensional Diffusion Models",
+        "Experiment": "1. Modify MLPDenoiser to accept embedding_dim as a parameter for both time and input embeddings. 2. Categorize datasets by complexity (e.g., number of modes: circle=1, line=1, moons=2, dino=multiple). 3. Train models with various embedding dimensions (32, 64, 128, 256, 512) on each dataset. 4. Compare performance using final KL divergence, steps to reach KL threshold, visual sample quality, and training time. 5. Analyze the relationship between dataset complexity and optimal embedding dimension. 6. Investigate potential overfitting and diminishing returns with very high embedding dimensions.",
+        "Interestingness": 9,
+        "Feasibility": 9,
+        "Novelty": 7,
+        "novel": true
+    },
+    {
+        "Name": "cross_dataset_generalization",
+        "Title": "One-to-Many Transfer Learning in Low-Dimensional Diffusion Models",
+        "Experiment": "1. Modify the training loop to save the model trained on the 'circle' dataset. 2. Implement a function to evaluate this trained model on all datasets using both KL divergence and evaluation loss. 3. Generate and visually compare samples from the transfer scenarios. 4. Repeat the experiment with different embedding dimensions (64, 128, 256) to analyze its impact on transfer performance. 5. Discuss implications for designing robust low-dimensional diffusion models.",
+        "Interestingness": 9,
+        "Feasibility": 9,
+        "Novelty": 8,
+        "novel": true
+    },
+    {
+        "Name": "temperature_controlled_sampling",
+        "Title": "Temperature-Controlled Sampling in Low-Dimensional Diffusion Models: Balancing Quality and Diversity",
+        "Experiment": "1. Modify NoiseScheduler's step function to include a temperature parameter that scales the noise added during sampling. 2. Implement a temperature-controlled sampling function. 3. Train models on each dataset using the original settings. 4. Generate samples at various temperatures (0.5, 0.8, 1.0, 1.2, 1.5) for each trained model. 5. Evaluate samples using KL divergence, visual inspection, average pairwise distance (diversity metric), and a new mode coverage metric (e.g., k-means clustering). 6. Compare results at different temperatures with the baseline (temp=1.0). 7. Analyze the quality-diversity trade-off and mode coverage across different datasets and temperatures.",
+        "Interestingness": 9,
+        "Feasibility": 8,
+        "Novelty": 8,
+        "novel": true
+    }
+]

@@ -1,0 +1,30 @@
+latex/template.tex
+```latex
+<<<<<<< SEARCH
+\section{Related Work}
+\label{sec:related}
+RELATED WORK HERE
+=======
+\section{Related Work}
+\label{sec:related}
+% Overview of academic siblings of our work
+% Comparison and contrast with alternative approaches in literature
+% Clear statement on applicability of methods to our Problem Setting
+
+% 1. Diffusion Models and Learning Rate Schedules
+% 2. Comparison with Specific Adaptive Learning Rate Schedules
+% 3. Other Generative Models and Their Learning Rate Strategies
+
+% 1. Diffusion Models and Learning Rate Schedules
+% Discuss the general landscape of diffusion models and the importance of learning rate schedules
+% Compare with foundational work on DDPM and its optimization strategies
+
+% 2. Comparison with Specific Adaptive Learning Rate Schedules
+% Discuss specific adaptive learning rate schedules and their application in diffusion models
+% Compare with Cosine Annealing with Warm Restarts, One Cycle Learning Rate, Cyclical Learning Rate, Exponential Learning Rate Decay, and Cosine Annealing Learning Rate
+
+% 3. Other Generative Models and Their Learning Rate Strategies
+% Discuss learning rate strategies in other generative models like VAEs and GANs
+% Compare and contrast with diffusion models, highlighting differences in optimization challenges and solutions
+>>>>>>> REPLACE
+```

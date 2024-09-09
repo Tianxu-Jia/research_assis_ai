@@ -2,9 +2,9 @@ import openai
 import os.path as osp
 import shutil
 import json
-import argparse
+
 import multiprocessing
-import torch
+
 import os
 import time
 import sys
@@ -17,98 +17,11 @@ from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
 from ai_scientist.perform_review import perform_review, load_paper, perform_improvement
 
+from ai_scientist.utils import print_time, parse_arguments, get_gpu_memory
+
 NUM_REFLECTIONS = 3
 
-def print_time():
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Run AI scientist experiments")
-    parser.add_argument(
-        "--skip-idea-generation",
-        action="store_true",
-        help="Skip idea generation and load existing ideas",
-    )
-    parser.add_argument(
-        "--skip-novelty-check",
-        action="store_true",
-        help="Skip novelty check and use existing ideas",
-    )
-    # add type of experiment (nanoGPT, Boston, etc.)
-    parser.add_argument(
-        "--experiment",
-        type=str,
-        default="nanoGPT",
-        help="Experiment to run AI Scientist on.",
-    )
-    parser.add_argument(
-        "--model",
-        type=str,
-        default="claude-3-5-sonnet-20240620",
-        choices=[
-            "claude-3-5-sonnet-20240620",
-            "gpt-4o-2024-05-13",
-            "gpt-4o-mini-2024-07-18",
-            "deepseek-coder-v2-0724",
-            "llama3.1-405b",
-            # Anthropic Claude models via Amazon Bedrock
-            "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
-            "bedrock/anthropic.claude-3-5-sonnet-20240620-v1:0",
-            "bedrock/anthropic.claude-3-haiku-20240307-v1:0",
-            "bedrock/anthropic.claude-3-opus-20240229-v1:0"
-            # Anthropic Claude models Vertex AI
-            "vertex_ai/claude-3-opus@20240229",
-            "vertex_ai/claude-3-5-sonnet@20240620",
-            "vertex_ai/claude-3-sonnet@20240229",
-            "vertex_ai/claude-3-haiku@20240307",
-            # Ollamaa models
-            "ollama/llama3.1",
-            "ollama/deepseek-coder-v2:16b",
-            "ollama/phi3.5",
-            # huggingface models
-            #"huggingface/THUDM/LongWriter-glm4-9b",
-            # anthropic claude
-            "anthropic/claude-3-5-sonnet-20240620"
-
-        ],
-        help="Model to use for AI Scientist.",
-    )
-    parser.add_argument(
-        "--writeup",
-        type=str,
-        default="latex",
-        choices=["latex"],
-        help="What format to use for writeup",
-    )
-    parser.add_argument(
-        "--parallel",
-        type=int,
-        default=0,
-        help="Number of parallel processes to run. 0 for sequential execution.",
-    )
-    parser.add_argument(
-        "--improvement",
-        action="store_true",
-        help="Improve based on reviews.",
-    )
-    parser.add_argument(
-        "--gpus",
-        type=str,
-        default=None,
-        help="Comma-separated list of GPU IDs to use (e.g., '0,1,2'). If not specified, all available GPUs will be used.",
-    )
-    parser.add_argument(
-        "--num-ideas",
-        type=int,
-        default=50,
-        help="Number of ideas to generate",
-    )
-    return parser.parse_args()
-
-def get_available_gpus(gpu_ids=None):
-    if gpu_ids is not None:
-        return [int(gpu_id) for gpu_id in gpu_ids.split(",")]
-    return list(range(torch.cuda.device_count()))
 
 def worker(queue, base_dir, results_dir, model, client, client_model, writeup, improvement, gpu_id):
     pass
@@ -312,45 +225,6 @@ def do_idea(base_dir, results_dir, idea, model, client, client_model, writeup, i
 if __name__ == "__main__":
     args = parse_arguments()
     
-    """
-    Checks the available GPUs and adjusts the number of parallel processes if necessary.
-    
-    This code block is responsible for the following:
-    1. Retrieves the available GPUs using the `get_available_gpus()` function, passing the `args.gpus` parameter.
-    2. Compares the number of requested parallel processes (`args.parallel`) to the number of available GPUs.
-    3. If the requested parallel processes exceed the available GPUs, it prints a warning message and adjusts the `args.parallel` value to match the number of available GPUs.
-    4. Prints the list of GPUs that will be used for the parallel processes.
-    """
-    available_gpus = get_available_gpus(args.gpus)
-    if args.parallel > len(available_gpus):
-        print(
-            f"Warning: Requested {args.parallel} parallel processes, but only {len(available_gpus)} GPUs available. Adjusting to {len(available_gpus)}."
-        )
-        args.parallel = len(available_gpus)
-
-    print(f"Using GPUs: {available_gpus}")
-
-
-
-    """
-    Creates an AI client based on the specified model. Supports various AI models and providers, 
-    including Anthropic's Claude, Amazon Bedrock, Google Vertex AI, and OpenAI's GPT-4 and DeepSeek Coder.
-    
-    The function checks the `args.model` parameter to determine the appropriate AI client and model to use. 
-    It then prints a message indicating which client and model are being used.
-    
-    If the specified model is not supported, the function raises a `ValueError`.
-    """
-    # Create client
-    #if args.model.split('/')[0]== "huggingface":
-    #    from huggingface_hub import InferenceClient#
-
-    #    print(f"Using HuggingFace python API with model {args.model}.")
-
-    #    client_model = args.model
-    #    client = InferenceClient(    
-    #        api_key="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",
-    #        )
 
     if args.model.split('/')[0]== "ollama":
         from openai import OpenAI
@@ -445,67 +319,29 @@ if __name__ == "__main__":
     )
     
     with open(osp.join(base_dir, "ideas.json"), "w") as f:
-        json.dump(ideas, f, indent=4)
-    
+        json.dump(ideas, f, indent=4)   
 
     #with open(osp.join(base_dir, "ideas.json"), 'r') as file:
     #    ideas = json.load(file)
 
-    novel_ideas = [idea for idea in ideas if idea["novel"]]
-
-    #######################################
-    if args.parallel > 0:
-        print(f"Running {args.parallel} parallel processes")
-        queue = multiprocessing.Queue()
-        for idea in novel_ideas:
-            queue.put(idea)
-
-        processes = []
-        for i in range(args.parallel):
-            gpu_id = available_gpus[i % len(available_gpus)]
-            p = multiprocessing.Process(
-                target=worker,
-                args=(
-                    queue,
-                    base_dir,
-                    results_dir,
-                    args.model,
-                    client,
-                    client_model,
-                    args.writeup,
-                    args.improvement,
-                    gpu_id,
-                ),
+    novel_ideas = [idea for idea in ideas if idea["novel"]]    
+    
+    for idea in novel_ideas:
+        print(f"Processing idea: {idea['Name']}")
+        try:
+            success = do_idea(
+                base_dir,
+                results_dir,
+                idea,
+                args.model,
+                client,
+                client_model,
+                args.writeup,
+                args.improvement,
             )
-            p.start()
-            time.sleep(150)
-            processes.append(p)
-
-        # Signal workers to exit
-        for _ in range(args.parallel):
-            queue.put(None)
-
-        for p in processes:
-            p.join()
-
-        print("All parallel processes completed.")
-    else:
-        for idea in novel_ideas:
-            print(f"Processing idea: {idea['Name']}")
-            try:
-                success = do_idea(
-                    base_dir,
-                    results_dir,
-                    idea,
-                    args.model,
-                    client,
-                    client_model,
-                    args.writeup,
-                    args.improvement,
-                )
-                print(f"Completed idea: {idea['Name']}, Success: {success}")
-            except Exception as e:
-                print(f"Failed to evaluate idea {idea['Name']}: {str(e)}")
+            print(f"Completed idea: {idea['Name']}, Success: {success}")
+        except Exception as e:
+            print(f"Failed to evaluate idea {idea['Name']}: {str(e)}")
 
     print("All ideas evaluated.")
 

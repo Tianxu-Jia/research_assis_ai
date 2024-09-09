@@ -1,0 +1,507 @@
+2024-09-04 15:52:50
+*Starting idea: 20240904_155250_mode_targeted_diffusion*
+2024-09-04 15:52:57
+*Starting Experiments*
+Thank you for providing the detailed instructions and baseline results. I'll plan the experiments to implement the Mode-Targeted Generation in Low-Dimensional Diffusion Models. Here's  
+the list of experiments I propose:                                                                                                                                                       
+
+ 1 Run 1: Implement basic mode-targeted generation                                                                                                                                       
+    • Modify MLPDenoiser to accept a one-hot encoded target mode                                                                                                                         
+    • Add a mode embedding layer                                                                                                                                                         
+    • Concatenate mode embedding with existing embeddings                                                                                                                                
+    • Implement mode definition for each dataset                                                                                                                                         
+    • Add mode accuracy metric                                                                                                                                                           
+ 2 Run 2: Improve mode definition and add mode-specific loss                                                                                                                             
+    • Refine mode definitions for each dataset                                                                                                                                           
+    • Implement a mode-specific loss term                                                                                                                                                
+    • Adjust the loss function to balance reconstruction and mode accuracy                                                                                                               
+ 3 Run 3: Experiment with different mode embedding sizes                                                                                                                                 
+    • Test a larger mode embedding size to potentially capture more complex mode information                                                                                             
+ 4 Run 4: Implement curriculum learning for mode-targeted generation                                                                                                                     
+    • Start training with a higher weight on unconditional generation and gradually increase the weight of mode-targeted generation                                                      
+
+Let's start with Run 1. I'll make the necessary changes to implement basic mode-targeted generation.                                                                                     
+
+experiment.py                                                                                                                                                                            
+
+                                                                                                                                                                                         
+ <<<<<<< SEARCH                                                                                                                                                                          
+ import argparse                                                                                                                                                                         
+ import json                                                                                                                                                                             
+ import time                                                                                                                                                                             
+ import os.path as osp                                                                                                                                                                   
+ import numpy as np                                                                                                                                                                      
+ from tqdm.auto import tqdm                                                                                                                                                              
+ import npeet.entropy_estimators as ee                                                                                                                                                   
+ import pickle                                                                                                                                                                           
+ import pathlib                                                                                                                                                                          
+                                                                                                                                                                                         
+ import torch                                                                                                                                                                            
+ from torch import nn                                                                                                                                                                    
+ from torch.nn import functional as F                                                                                                                                                    
+ from torch.utils.data import DataLoader                                                                                                                                                 
+ from torch.optim.lr_scheduler import CosineAnnealingLR                                                                                                                                  
+ from ema_pytorch import EMA                                                                                                                                                             
+                                                                                                                                                                                         
+ import datasets                                                                                                                                                                         
+                                                                                                                                                                                         
+ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")                                                                                                                   
+ =======                                                                                                                                                                                 
+ import argparse                                                                                                                                                                         
+ import json                                                                                                                                                                             
+ import time                                                                                                                                                                             
+ import os.path as osp                                                                                                                                                                   
+ import numpy as np                                                                                                                                                                      
+ from tqdm.auto import tqdm                                                                                                                                                              
+ import npeet.entropy_estimators as ee                                                                                                                                                   
+ import pickle                                                                                                                                                                           
+ import pathlib                                                                                                                                                                          
+                                                                                                                                                                                         
+ import torch                                                                                                                                                                            
+ from torch import nn                                                                                                                                                                    
+ from torch.nn import functional as F                                                                                                                                                    
+ from torch.utils.data import DataLoader                                                                                                                                                 
+ from torch.optim.lr_scheduler import CosineAnnealingLR                                                                                                                                  
+ from ema_pytorch import EMA                                                                                                                                                             
+                                                                                                                                                                                         
+ import datasets                                                                                                                                                                         
+                                                                                                                                                                                         
+ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")                                                                                                                   
+                                                                                                                                                                                         
+ def define_modes(dataset_name, x):                                                                                                                                                      
+     if dataset_name == "circle":                                                                                                                                                        
+         # Define modes based on quadrants                                                                                                                                               
+         return (x[:, 0] >= 0).long() + 2 * (x[:, 1] >= 0).long()                                                                                                                        
+     elif dataset_name == "dino":                                                                                                                                                        
+         # Define modes based on the four main parts of the dino                                                                                                                         
+         return (x[:, 0] >= 0).long() + 2 * (x[:, 1] >= 0).long()                                                                                                                        
+     elif dataset_name == "line":                                                                                                                                                        
+         # Define modes based on position along the line                                                                                                                                 
+         return (x[:, 0] >= 0).long()                                                                                                                                                    
+     elif dataset_name == "moons":                                                                                                                                                       
+         # Define modes based on the two moons                                                                                                                                           
+         return (x[:, 1] >= 0.5).long()                                                                                                                                                  
+     else:                                                                                                                                                                               
+         raise ValueError(f"Unknown dataset: {dataset_name}")                                                                                                                            
+                                                                                                                                                                                         
+ def mode_accuracy(pred_modes, true_modes):                                                                                                                                              
+     return (pred_modes == true_modes).float().mean().item()                                                                                                                             
+ >>>>>>> REPLACE                                                                                                                                                                         
+                                                                                                                                                                                         
+
+experiment.py                                                                                                                                                                            
+
+                                                                                                                                                                                         
+ <<<<<<< SEARCH                                                                                                                                                                          
+ class MLPDenoiser(nn.Module):                                                                                                                                                           
+     def __init__(                                                                                                                                                                       
+             self,                                                                                                                                                                       
+             embedding_dim: int = 128,                                                                                                                                                   
+             hidden_dim: int = 256,                                                                                                                                                      
+             hidden_layers: int = 3,                                                                                                                                                     
+     ):                                                                                                                                                                                  
+         super().__init__()                                                                                                                                                              
+         self.time_mlp = SinusoidalEmbedding(embedding_dim)                                                                                                                              
+         # sinusoidal embeddings help capture high-frequency patterns for low-dim data                                                                                                   
+         self.input_mlp1 = SinusoidalEmbedding(embedding_dim, scale=25.0)                                                                                                                
+         self.input_mlp2 = SinusoidalEmbedding(embedding_dim, scale=25.0)                                                                                                                
+                                                                                                                                                                                         
+         self.network = nn.Sequential(                                                                                                                                                   
+             nn.Linear(embedding_dim * 3, hidden_dim),                                                                                                                                   
+             *[ResidualBlock(hidden_dim) for _ in range(hidden_layers)],                                                                                                                 
+             nn.ReLU(),                                                                                                                                                                  
+             nn.Linear(hidden_dim, 2),                                                                                                                                                   
+         )                                                                                                                                                                               
+                                                                                                                                                                                         
+     def forward(self, x, t):                                                                                                                                                            
+         x1_emb = self.input_mlp1(x[:, 0])                                                                                                                                               
+         x2_emb = self.input_mlp2(x[:, 1])                                                                                                                                               
+         t_emb = self.time_mlp(t)                                                                                                                                                        
+         emb = torch.cat([x1_emb, x2_emb, t_emb], dim=-1)                                                                                                                                
+         return self.network(emb)                                                                                                                                                        
+ =======                                                                                                                                                                                 
+ class MLPDenoiser(nn.Module):                                                                                                                                                           
+     def __init__(                                                                                                                                                                       
+             self,                                                                                                                                                                       
+             embedding_dim: int = 128,                                                                                                                                                   
+             hidden_dim: int = 256,                                                                                                                                                      
+             hidden_layers: int = 3,                                                                                                                                                     
+             num_modes: int = 4,                                                                                                                                                         
+     ):                                                                                                                                                                                  
+         super().__init__()                                                                                                                                                              
+         self.time_mlp = SinusoidalEmbedding(embedding_dim)                                                                                                                              
+         # sinusoidal embeddings help capture high-frequency patterns for low-dim data                                                                                                   
+         self.input_mlp1 = SinusoidalEmbedding(embedding_dim, scale=25.0)                                                                                                                
+         self.input_mlp2 = SinusoidalEmbedding(embedding_dim, scale=25.0)                                                                                                                
+                                                                                                                                                                                         
+         # Add mode embedding                                                                                                                                                            
+         self.mode_embedding = nn.Embedding(num_modes, embedding_dim)                                                                                                                    
+                                                                                                                                                                                         
+         self.network = nn.Sequential(                                                                                                                                                   
+             nn.Linear(embedding_dim * 4, hidden_dim),  # Increased input size to include mode embedding                                                                                 
+             *[ResidualBlock(hidden_dim) for _ in range(hidden_layers)],                                                                                                                 
+             nn.ReLU(),                                                                                                                                                                  
+             nn.Linear(hidden_dim, 2),                                                                                                                                                   
+         )                                                                                                                                                                               
+                                                                                                                                                                                         
+     def forward(self, x, t, mode):                                                                                                                                                      
+         x1_emb = self.input_mlp1(x[:, 0])                                                                                                                                               
+         x2_emb = self.input_mlp2(x[:, 1])                                                                                                                                               
+         t_emb = self.time_mlp(t)                                                                                                                                                        
+         mode_emb = self.mode_embedding(mode)                                                                                                                                            
+         emb = torch.cat([x1_emb, x2_emb, t_emb, mode_emb], dim=-1)                                                                                                                      
+         return self.network(emb)                                                                                                                                                        
+ >>>>>>> REPLACE                                                                                                                                                                         
+                                                                                                                                                                                         
+
+experiment.py                                                                                                                                                                            
+
+                                                                                                                                                                                         
+ <<<<<<< SEARCH                                                                                                                                                                          
+ if __name__ == "__main__":                                                                                                                                                              
+     parser = argparse.ArgumentParser()                                                                                                                                                  
+     parser.add_argument("--train_batch_size", type=int, default=256)                                                                                                                    
+     parser.add_argument("--eval_batch_size", type=int, default=10000)                                                                                                                   
+     parser.add_argument("--learning_rate", type=float, default=3e-4)                                                                                                                    
+     parser.add_argument("--num_timesteps", type=int, default=100)                                                                                                                       
+     parser.add_argument("--num_train_steps", type=int, default=10000)                                                                                                                   
+     parser.add_argument("--beta_schedule", type=str, default="linear", choices=["linear", "quadratic"])                                                                                 
+     parser.add_argument("--embedding_dim", type=int, default=128)                                                                                                                       
+     parser.add_argument("--hidden_size", type=int, default=256)                                                                                                                         
+     parser.add_argument("--hidden_layers", type=int, default=3)                                                                                                                         
+     parser.add_argument("--out_dir", type=str, default="run_0")                                                                                                                         
+     config = parser.parse_args()                                                                                                                                                        
+                                                                                                                                                                                         
+     final_infos = {}                                                                                                                                                                    
+     all_results = {}                                                                                                                                                                    
+                                                                                                                                                                                         
+     pathlib.Path(config.out_dir).mkdir(parents=True, exist_ok=True)                                                                                                                     
+                                                                                                                                                                                         
+     for dataset_name in ["circle", "dino", "line", "moons"]:                                                                                                                            
+         dataset = datasets.get_dataset(dataset_name, n=100000)                                                                                                                          
+         dataloader = DataLoader(dataset, batch_size=config.train_batch_size, shuffle=True)                                                                                              
+                                                                                                                                                                                         
+         model = MLPDenoiser(                                                                                                                                                            
+             embedding_dim=config.embedding_dim,                                                                                                                                         
+             hidden_dim=config.hidden_size,                                                                                                                                              
+             hidden_layers=config.hidden_layers,                                                                                                                                         
+         ).to(device)                                                                                                                                                                    
+         ema_model = EMA(model, beta=0.995, update_every=10).to(device)                                                                                                                  
+                                                                                                                                                                                         
+         noise_scheduler = NoiseScheduler(num_timesteps=config.num_timesteps, beta_schedule=config.beta_schedule)                                                                        
+                                                                                                                                                                                         
+         optimizer = torch.optim.AdamW(                                                                                                                                                  
+             model.parameters(),                                                                                                                                                         
+             lr=config.learning_rate,                                                                                                                                                    
+         )                                                                                                                                                                               
+         scheduler = CosineAnnealingLR(optimizer, T_max=config.num_train_steps)                                                                                                          
+         train_losses = []                                                                                                                                                               
+         print("Training model...")                                                                                                                                                      
+                                                                                                                                                                                         
+         model.train()                                                                                                                                                                   
+         global_step = 0                                                                                                                                                                 
+         progress_bar = tqdm(total=config.num_train_steps, mininterval=10, disable=True)                                                                                                 
+         progress_bar.set_description("Training")                                                                                                                                        
+                                                                                                                                                                                         
+         start_time = time.time()                                                                                                                                                        
+         while global_step < config.num_train_steps:                                                                                                                                     
+             for batch in dataloader:                                                                                                                                                    
+                 if global_step >= config.num_train_steps:                                                                                                                               
+                     break                                                                                                                                                               
+                 batch = batch[0].to(device)                                                                                                                                             
+                 noise = torch.randn(batch.shape).to(device)                                                                                                                             
+                 timesteps = torch.randint(                                                                                                                                              
+                     0, noise_scheduler.num_timesteps, (batch.shape[0],)                                                                                                                 
+                 ).long().to(device)                                                                                                                                                     
+                                                                                                                                                                                         
+                 noisy = noise_scheduler.add_noise(batch, noise, timesteps)                                                                                                              
+                 noise_pred = model(noisy, timesteps)                                                                                                                                    
+                 loss = F.mse_loss(noise_pred, noise)                                                                                                                                    
+                 loss.backward()                                                                                                                                                         
+                                                                                                                                                                                         
+                 nn.utils.clip_grad_norm_(model.parameters(), 0.5)                                                                                                                       
+                 optimizer.step()                                                                                                                                                        
+                 optimizer.zero_grad()                                                                                                                                                   
+                 ema_model.update()                                                                                                                                                      
+                                                                                                                                                                                         
+                 scheduler.step()                                                                                                                                                        
+                 progress_bar.update(1)                                                                                                                                                  
+                 logs = {"loss": loss.detach().item()}                                                                                                                                   
+                 train_losses.append(loss.detach().item())                                                                                                                               
+                 progress_bar.set_postfix(**logs)                                                                                                                                        
+                 global_step += 1                                                                                                                                                        
+                                                                                                                                                                                         
+         progress_bar.close()                                                                                                                                                            
+         end_time = time.time()                                                                                                                                                          
+         training_time = end_time - start_time                                                                                                                                           
+                                                                                                                                                                                         
+         # Eval loss                                                                                                                                                                     
+         model.eval()                                                                                                                                                                    
+         eval_losses = []                                                                                                                                                                
+         for batch in dataloader:                                                                                                                                                        
+             batch = batch[0].to(device)                                                                                                                                                 
+             noise = torch.randn(batch.shape).to(device)                                                                                                                                 
+             timesteps = torch.randint(                                                                                                                                                  
+                 0, noise_scheduler.num_timesteps, (batch.shape[0],)                                                                                                                     
+             ).long().to(device)                                                                                                                                                         
+             noisy = noise_scheduler.add_noise(batch, noise, timesteps)                                                                                                                  
+             noise_pred = model(noisy, timesteps)                                                                                                                                        
+             loss = F.mse_loss(noise_pred, noise)                                                                                                                                        
+             eval_losses.append(loss.detach().item())                                                                                                                                    
+         eval_loss = np.mean(eval_losses)                                                                                                                                                
+                                                                                                                                                                                         
+         # Eval image saving                                                                                                                                                             
+         ema_model.eval()                                                                                                                                                                
+         sample = torch.randn(config.eval_batch_size, 2).to(device)                                                                                                                      
+         timesteps = list(range(len(noise_scheduler)))[::-1]                                                                                                                             
+         inference_start_time = time.time()                                                                                                                                              
+         for t in timesteps:                                                                                                                                                             
+             t = torch.from_numpy(np.repeat(t, config.eval_batch_size)).long().to(device)                                                                                                
+             with torch.no_grad():                                                                                                                                                       
+                 residual = ema_model(sample, t)                                                                                                                                         
+             sample = noise_scheduler.step(residual, t[0], sample)                                                                                                                       
+         sample = sample.cpu().numpy()                                                                                                                                                   
+         inference_end_time = time.time()                                                                                                                                                
+         inference_time = inference_end_time - inference_start_time                                                                                                                      
+                                                                                                                                                                                         
+         # Eval estimated KL                                                                                                                                                             
+         real_data = dataset.tensors[0].numpy()                                                                                                                                          
+         kl_divergence = ee.kldiv(real_data, sample, k=5)                                                                                                                                
+                                                                                                                                                                                         
+         final_infos[dataset_name] = {                                                                                                                                                   
+             "means": {                                                                                                                                                                  
+                 "training_time": training_time,                                                                                                                                         
+                 "eval_loss": eval_loss,                                                                                                                                                 
+                 "inference_time": inference_time,                                                                                                                                       
+                 "kl_divergence": kl_divergence,                                                                                                                                         
+             }                                                                                                                                                                           
+         }                                                                                                                                                                               
+                                                                                                                                                                                         
+         all_results[dataset_name] = {                                                                                                                                                   
+             "train_losses": train_losses,                                                                                                                                               
+             "images": sample,                                                                                                                                                           
+         }                                                                                                                                                                               
+                                                                                                                                                                                         
+     with open(osp.join(config.out_dir, "final_info.json"), "w") as f:                                                                                                                   
+         json.dump(final_infos, f)                                                                                                                                                       
+                                                                                                                                                                                         
+     with open(osp.join(config.out_dir, "all_results.pkl"), "wb") as f:                                                                                                                  
+         pickle.dump(all_results, f)                                                                                                                                                     
+ =======                                                                                                                                                                                 
+ if __name__ == "__main__":                                                                                                                                                              
+     parser = argparse.ArgumentParser()                                                                                                                                                  
+     parser.add_argument("--train_batch_size", type=int, default=256)                                                                                                                    
+     parser.add_argument("--eval_batch_size", type=int, default=10000)                                                                                                                   
+     parser.add_argument("--learning_rate", type=float, default=3e-4)                                                                                                                    
+     parser.add_argument("--num_timesteps", type=int, default=100)                                                                                                                       
+     parser.add_argument("--num_train_steps", type=int, default=10000)                                                                                                                   
+     parser.add_argument("--beta_schedule", type=str, default="linear", choices=["linear", "quadratic"])                                                                                 
+     parser.add_argument("--embedding_dim", type=int, default=128)                                                                                                                       
+     parser.add_argument("--hidden_size", type=int, default=256)                                                                                                                         
+     parser.add_argument("--hidden_layers", type=int, default=3)                                                                                                                         
+     parser.add_argument("--out_dir", type=str, default="run_0")                                                                                                                         
+     config = parser.parse_args()                                                                                                                                                        
+                                                                                                                                                                                         
+     final_infos = {}                                                                                                                                                                    
+     all_results = {}                                                                                                                                                                    
+                                                                                                                                                                                         
+     pathlib.Path(config.out_dir).mkdir(parents=True, exist_ok=True)                                                                                                                     
+                                                                                                                                                                                         
+     for dataset_name in ["circle", "dino", "line", "moons"]:                                                                                                                            
+         dataset = datasets.get_dataset(dataset_name, n=100000)                                                                                                                          
+         dataloader = DataLoader(dataset, batch_size=config.train_batch_size, shuffle=True)                                                                                              
+                                                                                                                                                                                         
+         num_modes = 4 if dataset_name in ["circle", "dino"] else 2                                                                                                                      
+         model = MLPDenoiser(                                                                                                                                                            
+             embedding_dim=config.embedding_dim,                                                                                                                                         
+             hidden_dim=config.hidden_size,                                                                                                                                              
+             hidden_layers=config.hidden_layers,                                                                                                                                         
+             num_modes=num_modes,                                                                                                                                                        
+         ).to(device)                                                                                                                                                                    
+         ema_model = EMA(model, beta=0.995, update_every=10).to(device)                                                                                                                  
+                                                                                                                                                                                         
+         noise_scheduler = NoiseScheduler(num_timesteps=config.num_timesteps, beta_schedule=config.beta_schedule)                                                                        
+                                                                                                                                                                                         
+         optimizer = torch.optim.AdamW(                                                                                                                                                  
+             model.parameters(),                                                                                                                                                         
+             lr=config.learning_rate,                                                                                                                                                    
+         )                                                                                                                                                                               
+         scheduler = CosineAnnealingLR(optimizer, T_max=config.num_train_steps)                                                                                                          
+         train_losses = []                                                                                                                                                               
+         mode_accuracies = []                                                                                                                                                            
+         print("Training model...")                                                                                                                                                      
+                                                                                                                                                                                         
+         model.train()                                                                                                                                                                   
+         global_step = 0                                                                                                                                                                 
+         progress_bar = tqdm(total=config.num_train_steps, mininterval=10, disable=True)                                                                                                 
+         progress_bar.set_description("Training")                                                                                                                                        
+                                                                                                                                                                                         
+         start_time = time.time()                                                                                                                                                        
+         while global_step < config.num_train_steps:                                                                                                                                     
+             for batch in dataloader:                                                                                                                                                    
+                 if global_step >= config.num_train_steps:                                                                                                                               
+                     break                                                                                                                                                               
+                 batch = batch[0].to(device)                                                                                                                                             
+                 modes = define_modes(dataset_name, batch)                                                                                                                               
+                 noise = torch.randn(batch.shape).to(device)                                                                                                                             
+                 timesteps = torch.randint(                                                                                                                                              
+                     0, noise_scheduler.num_timesteps, (batch.shape[0],)                                                                                                                 
+                 ).long().to(device)                                                                                                                                                     
+                                                                                                                                                                                         
+                 noisy = noise_scheduler.add_noise(batch, noise, timesteps)                                                                                                              
+                 noise_pred = model(noisy, timesteps, modes)                                                                                                                             
+                 loss = F.mse_loss(noise_pred, noise)                                                                                                                                    
+                 loss.backward()                                                                                                                                                         
+                                                                                                                                                                                         
+                 nn.utils.clip_grad_norm_(model.parameters(), 0.5)                                                                                                                       
+                 optimizer.step()                                                                                                                                                        
+                 optimizer.zero_grad()                                                                                                                                                   
+                 ema_model.update()                                                                                                                                                      
+                                                                                                                                                                                         
+                 scheduler.step()                                                                                                                                                        
+                 progress_bar.update(1)                                                                                                                                                  
+                 logs = {"loss": loss.detach().item()}                                                                                                                                   
+                 train_losses.append(loss.detach().item())                                                                                                                               
+                 progress_bar.set_postfix(**logs)                                                                                                                                        
+                 global_step += 1                                                                                                                                                        
+                                                                                                                                                                                         
+         progress_bar.close()                                                                                                                                                            
+         end_time = time.time()                                                                                                                                                          
+         training_time = end_time - start_time                                                                                                                                           
+                                                                                                                                                                                         
+         # Eval loss and mode accuracy                                                                                                                                                   
+         model.eval()                                                                                                                                                                    
+         eval_losses = []                                                                                                                                                                
+         mode_accuracies = []                                                                                                                                                            
+         for batch in dataloader:                                                                                                                                                        
+             batch = batch[0].to(device)                                                                                                                                                 
+             true_modes = define_modes(dataset_name, batch)                                                                                                                              
+             noise = torch.randn(batch.shape).to(device)                                                                                                                                 
+             timesteps = torch.randint(                                                                                                                                                  
+                 0, noise_scheduler.num_timesteps, (batch.shape[0],)                                                                                                                     
+             ).long().to(device)                                                                                                                                                         
+             noisy = noise_scheduler.add_noise(batch, noise, timesteps)                                                                                                                  
+             noise_pred = model(noisy, timesteps, true_modes)                                                                                                                            
+             loss = F.mse_loss(noise_pred, noise)                                                                                                                                        
+             eval_losses.append(loss.detach().item())                                                                                                                                    
+                                                                                                                                                                                         
+             # Compute mode accuracy                                                                                                                                                     
+             pred_sample = noise_scheduler.reconstruct_x0(noisy, timesteps, noise_pred)                                                                                                  
+             pred_modes = define_modes(dataset_name, pred_sample)                                                                                                                        
+             mode_accuracies.append(mode_accuracy(pred_modes, true_modes))                                                                                                               
+                                                                                                                                                                                         
+         eval_loss = np.mean(eval_losses)                                                                                                                                                
+         mode_accuracy_score = np.mean(mode_accuracies)                                                                                                                                  
+                                                                                                                                                                                         
+         # Eval image saving and KL divergence for each mode                                                                                                                             
+         ema_model.eval()                                                                                                                                                                
+         all_samples = []                                                                                                                                                                
+         all_kl_divergences = []                                                                                                                                                         
+         for mode in range(num_modes):                                                                                                                                                   
+             sample = torch.randn(config.eval_batch_size, 2).to(device)                                                                                                                  
+             modes = torch.full((config.eval_batch_size,), mode, dtype=torch.long).to(device)                                                                                            
+             timesteps = list(range(len(noise_scheduler)))[::-1]                                                                                                                         
+             inference_start_time = time.time()                                                                                                                                          
+             for t in timesteps:                                                                                                                                                         
+                 t = torch.from_numpy(np.repeat(t, config.eval_batch_size)).long().to(device)                                                                                            
+                 with torch.no_grad():                                                                                                                                                   
+                     residual = ema_model(sample, t, modes)                                                                                                                              
+                 sample = noise_scheduler.step(residual, t[0], sample)                                                                                                                   
+             sample = sample.cpu().numpy()                                                                                                                                               
+             all_samples.append(sample)                                                                                                                                                  
+             inference_end_time = time.time()                                                                                                                                            
+             inference_time = inference_end_time - inference_start_time                                                                                                                  
+                                                                                                                                                                                         
+             # Eval estimated KL for this mode                                                                                                                                           
+             real_data = dataset.tensors[0].numpy()                                                                                                                                      
+             real_data_mode = real_data[define_modes(dataset_name, torch.tensor(real_data)) == mode]                                                                                     
+             kl_divergence = ee.kldiv(real_data_mode, sample, k=5)                                                                                                                       
+             all_kl_divergences.append(kl_divergence)                                                                                                                                    
+                                                                                                                                                                                         
+         # Combine samples from all modes                                                                                                                                                
+         combined_sample = np.concatenate(all_samples, axis=0)                                                                                                                           
+                                                                                                                                                                                         
+         final_infos[dataset_name] = {                                                                                                                                                   
+             "means": {                                                                                                                                                                  
+                 "training_time": training_time,                                                                                                                                         
+                 "eval_loss": eval_loss,                                                                                                                                                 
+                 "inference_time": inference_time,                                                                                                                                       
+                 "kl_divergence": np.mean(all_kl_divergences),                                                                                                                           
+                 "mode_accuracy": mode_accuracy_score,                                                                                                                                   
+             }                                                                                                                                                                           
+         }                                                                                                                                                                               
+                                                                                                                                                                                         
+         all_results[dataset_name] = {                                                                                                                                                   
+             "train_losses": train_losses,                                                                                                                                               
+             "images": combined_sample,                                                                                                                                                  
+             "mode_accuracies": mode_accuracies,                                                                                                                                         
+             "kl_divergences": all_kl_divergences,                                                                                                                                       
+         }                                                                                                                                                                               
+                                                                                                                                                                                         
+     with open(osp.join(config.out_dir, "final_info.json"), "w") as f:                                                                                                                   
+         json.dump(final_infos, f)                                                                                                                                                       
+                                                                                                                                                                                         
+     with open(osp.join(config.out_dir, "all_results.pkl"), "wb") as f:                                                                                                                  
+         pickle.dump(all_results, f)                                                                                                                                                     
+ >>>>>>> REPLACE                                                                                                                                                                         
+                                                                                                                                                                                         
+
+These changes implement the basic mode-targeted generation as described in Run 1. The main modifications include:                                                                        
+
+ 1 Added a define_modes function to determine the mode for each data point based on dataset characteristics.                                                                             
+ 2 Modified the MLPDenoiser class to accept a mode input and include a mode embedding layer.                                                                                             
+ 3 Updated the training and evaluation loops to include mode information.                                                                                                                
+ 4 Added a mode accuracy metric to evaluate how well the model generates samples for each mode.                                                                                          
+ 5 Modified the evaluation process to generate samples and compute KL divergence for each mode separately.                                                                               
+
+To run this experiment, use the command:                                                                                                                                                 
+
+                                                                                                                                                                                         
+ python experiment.py --out_dir=run_1                                                                                                                                                    
+                                                                                                                                                                                         
+
+This will implement the basic mode-targeted generation and provide results for comparison with the baseline.                                                                             
+
+Tokens: 7.4k sent, 5.3k received. Cost: $0.10 message, $0.10 session.
+Applied edit to experiment.py
+
+# Fix any errors below, if possible.
+
+## Running: /home/txjia/anaconda3/envs/ai_scientist/bin/python -m flake8 --select=E9,F821,F823,F831,F406,F407,F701,F702,F704,F706 --show-source --isolated experiment.py
+
+0.00s - Debugger warning: It seems that frozen modules are being used, which may
+0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+0.00s - to python to disable frozen modules.
+0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+
+## See relevant line below marked with █.
+
+experiment.py:
+
+
+litellm.InternalServerError: AnthropicException - {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}. Handle with `litellm.InternalServerError`.
+Retrying in 0.2 seconds...
+Thank you for running the flake8 check. It seems there were no errors reported by flake8 for the specified error codes. The experiment.py file appears to be free of the major issues    
+that flake8 was configured to check for.                                                                                                                                                 
+
+Since no specific errors were found, there's no need for any SEARCH/REPLACE blocks to fix issues in the code. The implementation of the basic mode-targeted generation in Run 1 seems to 
+be clean in terms of the checked error types.                                                                                                                                            
+
+If you'd like me to review any specific part of the code or make any other improvements, please let me know, and I'll be happy to help.                                                  
+
+Tokens: 24k sent, 144 received. Cost: $0.07 message, $0.17 session.
+Thank you for running the flake8 check. It seems there were no errors reported by flake8 for the specified error codes. The experiment.py file appears to be free of the major issues that flake8 was configured to check for.
+
+Since no specific errors were found, there's no need for any *SEARCH/REPLACE* blocks to fix issues in the code. The implementation of the basic mode-targeted generation in Run 1 seems to be clean in terms of the checked error types.
+
+If you'd like me to review any specific part of the code or make any other improvements, please let me know, and I'll be happy to help.
+0.00s - Debugger warning: It seems that frozen modules are being used, which may
+0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+0.00s - to python to disable frozen modules.
+0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+/home/txjia/anaconda3/envs/ai_scientist/lib/python3.11/site-packages/torch/cuda/__init__.py:128: UserWarning: CUDA initialization: CUDA unknown error - this may be due to an incorrectly set up environment, e.g. changing env variable CUDA_VISIBLE_DEVICES after program start. Setting the available devices to be zero. (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:108.)
+  return torch._C._cuda_getDeviceCount() > 0
+
+Error during experiments: 'run_num + 1'
+Experiments failed for idea 20240904_155250_mode_targeted_diffusion
+FINISHED IDEA

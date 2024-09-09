@@ -1,0 +1,11 @@
+# Title: Adaptive Learning Rate Schedules: Comparing different learning rate schedules for diffusion models.
+# Experiment description: In this experiment, we compare the performance of different learning rate schedules on diffusion model performance. We use the final estimated KL as the evaluation metric.
+## Run 0: Baseline
+Results: {'circle': {'training_time': 22.78913640975952, 'eval_loss': 0.4352689213155176, 'inference_time': 0.16325092315673828, 'kl_divergence': 0.3390841615593227}, 'dino': {'training_time': 21.349066257476807, 'eval_loss': 0.6604227140126631, 'inference_time': 0.15765833854675293, 'kl_divergence': 1.0292828033411612}, 'line': {'training_time': 20.768935203552246, 'eval_loss': 0.8046935080262401, 'inference_time': 0.15740132331848145, 'kl_divergence': 0.1572009839576215}, 'moons': {'training_time': 20.56239104270935, 'eval_loss': 0.614176513593825, 'inference_time': 0.12911629676818848, 'kl_divergence': 0.09562104554894295}}
+Description: Baseline results.
+
+## Run 1: Linear Learning Rate Decay
+Description: Implemented linear learning rate decay using LinearLR scheduler. The learning rate decays linearly from the initial value to 10% of the initial value over the course of training.
+
+## Run 2: Cosine Annealing with Warm Restarts
+Description: Implemented cosine annealing with warm restarts using CosineAnnealingWarmRestarts scheduler. The learning rate follows a cosine decay with periodic restarts, starting with a period of 1000 steps and doubling the period after each restart.

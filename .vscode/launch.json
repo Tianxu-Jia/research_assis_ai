@@ -37,17 +37,29 @@
                      "--num-ideas", "5"]
         },
         {
-            "name": "claude-2d-diffusion",
+            "name": "deepseek-2d-diffusion",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["--skip-idea-generation",
                      "--skip-novelty-check",
-                     "--model", "anthropic/claude-3-5-sonnet-20240620", 
+                     "--model", "deepseek-coder-v2-0724", 
                      "--experiment", "2d_diffusion", 
                      "--num-ideas", "5"]
+        },
+        {
+            "name": "test-writeup",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal", 
+            "args": ["--folder", "results/2d_diffusion/20240905_060430_learning_rate_schedule",
+                     "--no-writing",
+                     "--model", "deepseek-coder-v2-0724" ],
+            
         }
+
 
     ]    
 }
